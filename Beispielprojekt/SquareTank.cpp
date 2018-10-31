@@ -17,8 +17,20 @@ using namespace std;
 const double DT = 100.0;
 
 enum Orientierung { horizontal, vertikal };
-enum Zustand { Start, SpielfeldAufbauen, SpielerErstellen };
 
+class Geschoss 
+{
+	int16_t x;
+	int16_t y;
+	int16_t vx;
+	int16_t vy;
+	const int16_t vg = 20;
+	// GameWindow Fenster !!!
+	const int16_t lebenserwartung = 5000;
+	int16_t timetolive;
+public:
+
+};
 class Mauer
 {
 	const int16_t hoehe = 10;
@@ -35,22 +47,21 @@ public:
 	int16_t get_x(void) { return x; };
 	int16_t get_y(void) { return y; };
 };
+
 class Panzer
 {
-
-};
-class Geschoss : public Panzer
-{
+	int16_t spielernr;
+	// GameWindow Fenster !! als Zeiger
 	int16_t x;
 	int16_t y;
-	int16_t vx;
-	int16_t vy;
-	const int16_t vg = 20;
-	// GameWindow Fenster !!!
-	const int16_t lebenserwartung = 5000;
-	int16_t timetolive;
-
+	int16_t munition = 10;
+	vector<Geschoss> geschoss;
+	const int16_t nachladezeit = 3;
+	int16_t schussfreigabe;
+public:
+	Panzer(int16_t s/*Fenser*/) : spielernr(s) { };
 };
+
 
 class GameWindow : public Gosu::Window
 {
