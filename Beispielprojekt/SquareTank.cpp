@@ -17,6 +17,7 @@ using namespace std;
 const double DT = 100.0;
 
 enum Orientierung { horizontal, vertikal };
+enum Zustand {Start, SpielfeldAufbauen, SpielerErstellen};
 
 class Geschoss 
 {
