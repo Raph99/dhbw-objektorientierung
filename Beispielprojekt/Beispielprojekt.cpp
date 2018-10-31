@@ -15,9 +15,12 @@ const double DT = 100.0;
 
 class Mauer
 {
-	const double hoehe;
-	double laenge;
-	
+	const int16_t breite = 1;
+	int16_t laenge;
+	enum orientierung{horizontal, vertikal};
+public:
+	Mauer() {};
+
 };
 
 class GameWindow : public Gosu::Window
