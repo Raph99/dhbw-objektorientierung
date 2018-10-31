@@ -29,9 +29,8 @@ class GameWindow : public Gosu::Window
 public:
 	GameWindow()
 		: Window(640, 480)
-		, bild("rakete.png")
 	{
-		set_caption("Gosu Tutorial Game mit Git");
+		set_caption("SquareTank");
 	}
 
 	// wird bis zu 60x pro Sekunde aufgerufen.
@@ -71,7 +70,6 @@ public:
 			200, 10, Gosu::Color::RED,
 			0.0
 		);
-		bild.draw_rot(x, y,0.0, a ,0.5, 0.5);
 	}
 };
 // C++ Hauptprogramm

@@ -35,13 +35,7 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Beispielprojekt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Planet.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Vektor2d.cpp">
+    <ClCompile Include="SquareTank.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
