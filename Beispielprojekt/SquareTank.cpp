@@ -10,10 +10,15 @@
 #include "Planet.h"
 #include "Vektor2d.h"
 
+using namespace std;
+
 
 // Simulationsgeschwindigkeit
 const double DT = 100.0;
+
 enum Orientierung { horizontal, vertikal };
+enum Zustand { Start, SpielfeldAufbauen, SpielerErstellen };
+
 class Mauer
 {
 	const int16_t hoehe = 10;
@@ -50,6 +55,10 @@ class Geschoss : public Panzer
 class GameWindow : public Gosu::Window
 {
 public:
+	Zustand zustand = Start;
+	vector<Mauer> Mauern;
+	vector<Panzer> Panzer;
+
 	GameWindow()
 		: Window(720, 720)
 	{
@@ -61,12 +70,30 @@ public:
 	// dann werden `draw` Aufrufe ausgelassen und die Framerate sinkt
 	void update() override
 	{
-		
+		if (this->zustand == Start) {
+			this->zustand = SpielfeldAufbauen;
+		}
+		if (this->zustand == SpielfeldAufbauen) {
+			this->Mauern.push_back(Mauer(720, horizontal, 0, 0));
+			this->Mauern.push_back(Mauer(720, horizontal, 0, 710));
+			this->Mauern.push_back(Mauer(720, vertikal, 0, 0));
+			this->Mauern.push_back(Mauer(720, vertikal, 710, 0));
+		}
 	}
 
 	void draw() override
 	{
 		Gosu::Graphics::draw_rect(0.0, 0.0, this->width(), this->height(), Gosu::Color::WHITE, 0.0);
+
+		//Mauern zeichnen
+		for (Mauer mauer : this->Mauern) {
+			if (mauer.get_orientierung() == vertikal) {
+				Gosu::Graphics::draw_rect(mauer.get_x(), mauer.get_y(), mauer.get_hoehe(), mauer.get_laenge(), Gosu::Color::BLACK, 1.0);
+			}
+			else if (mauer.get_orientierung() == horizontal) {
+				Gosu::Graphics::draw_rect(mauer.get_x(), mauer.get_y(), mauer.get_laenge(), mauer.get_hoehe(), Gosu::Color::BLACK, 1.0);
+			}
+		}
 	}
 };
 // C++ Hauptprogramm
