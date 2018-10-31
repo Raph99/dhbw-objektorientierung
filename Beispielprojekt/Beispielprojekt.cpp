@@ -13,6 +13,13 @@
 // Simulationsgeschwindigkeit
 const double DT = 100.0;
 
+class Mauer
+{
+	const double hoehe;
+	double laenge;
+	
+};
+
 class GameWindow : public Gosu::Window
 {
 public:
