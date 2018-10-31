@@ -10,6 +10,7 @@
 #include "Planet.h"
 #include "Vektor2d.h"
 
+
 // Simulationsgeschwindigkeit
 const double DT = 100.0;
 
@@ -26,7 +27,6 @@ public:
 class GameWindow : public Gosu::Window
 {
 public:
-	Gosu::Image bild;
 	GameWindow()
 		: Window(640, 480)
 		, bild("rakete.png")
