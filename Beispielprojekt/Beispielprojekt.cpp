@@ -14,6 +14,8 @@
 // Simulationsgeschwindigkeit
 const double DT = 100.0;
 
+
+
 class GameWindow : public Gosu::Window
 {
 public:
