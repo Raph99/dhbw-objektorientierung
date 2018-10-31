@@ -28,48 +28,22 @@ class GameWindow : public Gosu::Window
 {
 public:
 	GameWindow()
-		: Window(640, 480)
+		: Window(720, 720)
 	{
 		set_caption("SquareTank");
 	}
 
 	// wird bis zu 60x pro Sekunde aufgerufen.
 	// Wenn die Grafikkarte oder der Prozessor nicht mehr hinterherkommen,
-	// dann werden `draw` Aufrufe ausgelassen und die Framerate sinktwaw
-	int x = 0;
-	int y = 0;
-	double a = 0;
-	double b = 0;
-	double angle = 0;
-	
+	// dann werden `draw` Aufrufe ausgelassen und die Framerate sinkt
 	void update() override
 	{
-		x = input().mouse_x();
-		y = input().mouse_y();
-
-		if (input().down(Gosu::ButtonName::MS_LEFT))
-		{
-			for (int i = 0; i <= 360; i++)
-			{
-				a--;
-			}
-		}
-		if (input().down(Gosu::ButtonName::MS_RIGHT))
-		{
-			for (int i = 0; i <= 360; i++)
-			{
-				a++;
-			}
-		}
+		
 	}
 
 	void draw() override
 	{
-		Gosu::Graphics::draw_line(
-			x, y, Gosu::Color::RED,
-			200, 10, Gosu::Color::RED,
-			0.0
-		);
+		Gosu::Graphics::draw_rect(0.0, 0.0, this->width(), this->height(), Gosu::Color::WHITE, 0.0);
 	}
 };
 // C++ Hauptprogramm
