@@ -37,7 +37,7 @@ class Geschoss
 	int16_t timetolive;
 
 public:
-	Geschoss(int16_t x, int16_t y, int16_t vx, int16_t vy, int16_t l) : x(x), y(y), vx(vx), vy(vy), lebenserwartung(l)
+	Geschoss(int16_t x, int16_t y, int16_t vx, int16_t vy, int16_t l, GameWindow& f) : x(x), y(y), vx(vx), vy(vy), lebenserwartung(l), Fenster(f)
 	{};
 };
 
