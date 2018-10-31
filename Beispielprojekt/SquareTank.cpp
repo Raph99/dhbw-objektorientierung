@@ -165,16 +165,16 @@ public:
 		//Mauern zeichnen
 		for (Mauer& mauer : this->MauernListe) {
 			if (mauer.get_orientierung() == horizontal) {
-				Gosu::Graphics::draw_rect(mauer.get_x(), mauer.get_y(), mauer.get_laenge(), mauer.get_hoehe(), Gosu::Color::BLACK, 1.0);
+				Gosu::Graphics::draw_rect(mauer.get_x(), mauer.get_y(), mauer.get_laenge(), mauer.get_hoehe(), Gosu::Color::BLACK, 2.0);
 			}
 			else if (mauer.get_orientierung() == vertikal) {
-				Gosu::Graphics::draw_rect(mauer.get_x(), mauer.get_y(), mauer.get_hoehe(), mauer.get_laenge(), Gosu::Color::BLACK, 1.0);
+				Gosu::Graphics::draw_rect(mauer.get_x(), mauer.get_y(), mauer.get_hoehe(), mauer.get_laenge(), Gosu::Color::BLACK, 2.0);
 			}
 		}
 
 		//Panzer zeichnen
 		for (Panzer& panzer : this->PanzerListe) {
-			panzer.get_bild().draw_rot(panzer.get_x(), panzer.get_y(), 0.5, panzer.get_angle());
+			panzer.get_bild().draw_rot(panzer.get_x(), panzer.get_y(), 1.0, panzer.get_angle());
 		}
 
 		//Geschosse zeichnen
