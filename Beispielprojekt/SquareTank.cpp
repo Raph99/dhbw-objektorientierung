@@ -13,14 +13,37 @@
 
 // Simulationsgeschwindigkeit
 const double DT = 100.0;
-
+enum Orientierung { horizontal, vertikal };
 class Mauer
 {
-	const int16_t breite = 1;
+	const int16_t hoehe = 10;
 	int16_t laenge;
-	enum orientierung{horizontal, vertikal};
+	Orientierung orientierung;
+	int16_t x;
+	int16_t y;
 public:
-	Mauer() {};
+	Mauer(int16_t l, Orientierung o, int16_t x, int16_t y) : laenge(l), orientierung(o), x(x), y(y)
+	{};
+	int16_t get_hoehe(void) { return hoehe; };
+	int16_t get_laenge(void) { return laenge; };
+	Orientierung get_orientierung(void) { return orientierung; };
+	int16_t get_x(void) { return x; };
+	int16_t get_y(void) { return y; };
+};
+class Panzer
+{
+
+};
+class Geschoss : public Panzer
+{
+	int16_t x;
+	int16_t y;
+	int16_t vx;
+	int16_t vy;
+	const int16_t vg = 20;
+	// GameWindow Fenster !!!
+	const int16_t lebenserwartung = 5000;
+	int16_t timetolive;
 
 };
 
