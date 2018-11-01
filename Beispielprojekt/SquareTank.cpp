@@ -211,6 +211,10 @@ void Panzer::act(void) {
 					this->angle = this->angle - 360.0;
 				}
 			}
+
+			if (this->Fenster.input().down(Gosu::KB_SPACE)) {
+				//Schuss
+			}
 		}
 		else if (this->spielernr == 2) {
 			if (this->Fenster.input().down(Gosu::KB_UP)) {
