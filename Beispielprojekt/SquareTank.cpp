@@ -27,6 +27,10 @@ class Mauer;
 class Panzer;
 class GameWindow;
 
+struct Position {
+	double x, y;
+};
+
 class Geschoss 
 {
 	const double vg = 20;
@@ -49,16 +53,25 @@ public:
 
 class Mauer
 {
-	const double hoehe = 10;
+	const double breite = 10;
 
 	double laenge;
+	double hoehe;
 	Orientierung orientierung;
 	double x;
 	double y;
 
 public:
-	Mauer(double l, Orientierung o, double x, double y) : laenge(l), orientierung(o), x(x), y(y)
+	Mauer(double l, Orientierung o, double x, double y) : orientierung(o), x(x), y(y)
 	{
+		if (this->orientierung == horizontal) {
+			this->laenge = l;
+			this->hoehe = this->breite;
+		}
+		else if (this->orientierung == vertikal) {
+			this->laenge = this->breite;
+			this->hoehe = l;
+		}
 	};
 
 	double get_hoehe(void) { return hoehe; };
@@ -98,6 +111,8 @@ public:
 	};
 
 	void act();
+
+	bool touchiertMauer();
 
 	double get_x(void) { return this->x; };
 	double get_y(void) { return this->y; };
@@ -164,12 +179,7 @@ public:
 		Gosu::Graphics::draw_rect(0.0, 0.0, this->width(), this->height(), Gosu::Color::WHITE, 0.0);
 		//Mauern zeichnen
 		for (Mauer& mauer : this->MauernListe) {
-			if (mauer.get_orientierung() == horizontal) {
-				Gosu::Graphics::draw_rect(mauer.get_x(), mauer.get_y(), mauer.get_laenge(), mauer.get_hoehe(), Gosu::Color::BLACK, 2.0);
-			}
-			else if (mauer.get_orientierung() == vertikal) {
-				Gosu::Graphics::draw_rect(mauer.get_x(), mauer.get_y(), mauer.get_hoehe(), mauer.get_laenge(), Gosu::Color::BLACK, 2.0);
-			}
+			Gosu::Graphics::draw_rect(mauer.get_x(), mauer.get_y(), mauer.get_laenge(), mauer.get_hoehe(), Gosu::Color::BLACK, 2.0);
 		}
 
 		//Panzer zeichnen
@@ -179,6 +189,10 @@ public:
 
 		//Geschosse zeichnen
 		//...
+	}
+
+	vector<Mauer> get_MauernListe(void) {
+		return this->MauernListe;
 	}
 };
 // C++ Hauptprogramm
@@ -194,21 +208,37 @@ void Panzer::act(void) {
 			if (this->Fenster.input().down(Gosu::KB_W)) {
 				this->x += sin(Gosu::degrees_to_radians(this->angle))*this->vg;
 				this->y += -cos(Gosu::degrees_to_radians(this->angle))*this->vg;
+				if (this->touchiertMauer()) {
+					this->x -= sin(Gosu::degrees_to_radians(this->angle))*this->vg;
+					this->y -= -cos(Gosu::degrees_to_radians(this->angle))*this->vg;
+				}
 			}
 			if (this->Fenster.input().down(Gosu::KB_S)) {
 				this->x -= sin(Gosu::degrees_to_radians(this->angle))*this->vg;
 				this->y -= -cos(Gosu::degrees_to_radians(this->angle))*this->vg;
+				if (this->touchiertMauer()) {
+					this->x += sin(Gosu::degrees_to_radians(this->angle))*this->vg;
+					this->y += -cos(Gosu::degrees_to_radians(this->angle))*this->vg;
+				}
 			}
 			if (this->Fenster.input().down(Gosu::KB_A)) {
+				double angle_old = this->angle;
 				this->angle -= this->vrot;
 				if (this->angle < 0.0) {
 					this->angle = 360.0 + this->angle;
 				}
+				if (this->touchiertMauer()) {
+					this->angle = angle_old;
+				}
 			}
 			if (this->Fenster.input().down(Gosu::KB_D)) {
+				double angle_old = this->angle;
 				this->angle += this->vrot;
 				if (this->angle > 360.0) {
 					this->angle = this->angle - 360.0;
+				}
+				if (this->touchiertMauer()) {
+					this->angle = angle_old;
 				}
 			}
 
@@ -220,23 +250,64 @@ void Panzer::act(void) {
 			if (this->Fenster.input().down(Gosu::KB_UP)) {
 				this->x += sin(Gosu::degrees_to_radians(this->angle))*this->vg;
 				this->y += -cos(Gosu::degrees_to_radians(this->angle))*this->vg;
+				if (this->touchiertMauer()) {
+					this->x -= sin(Gosu::degrees_to_radians(this->angle))*this->vg;
+					this->y -= -cos(Gosu::degrees_to_radians(this->angle))*this->vg;
+				}
 			}
 			if (this->Fenster.input().down(Gosu::KB_DOWN)) {
 				this->x -= sin(Gosu::degrees_to_radians(this->angle))*this->vg;
 				this->y -= -cos(Gosu::degrees_to_radians(this->angle))*this->vg;
+				if (this->touchiertMauer()) {
+					this->x += sin(Gosu::degrees_to_radians(this->angle))*this->vg;
+					this->y += -cos(Gosu::degrees_to_radians(this->angle))*this->vg;
+				}
 			}
 			if (this->Fenster.input().down(Gosu::KB_LEFT)) {
+				double angle_old = this->angle;
 				this->angle -= this->vrot;
 				if (this->angle < 0.0) {
 					this->angle = 360.0 + this->angle;
 				}
+				if (this->touchiertMauer()) {
+					this->angle = angle_old;
+				}
 			}
 			if (this->Fenster.input().down(Gosu::KB_RIGHT)) {
+				double angle_old = this->angle;
 				this->angle += this->vrot;
 				if (this->angle > 360.0) {
 					this->angle = this->angle - 360.0;
 				}
+				if (this->touchiertMauer()) {
+					this->angle = angle_old;
+				}
+			}
+
+			if (this->Fenster.input().down(Gosu::KB_RETURN)) {
+				//Schuss
 			}
 		}
 	}
+}
+
+bool Panzer::touchiertMauer(void) {
+	vector<Mauer> Mauernliste = this->Fenster.get_MauernListe();
+
+	double hoehe = this->bild.height();
+	double breite = this->bild.width();
+
+	vector<Position> kritischePunkte;
+
+	kritischePunkte.push_back({ this->x, this->y });
+
+	for (Mauer mauer : Mauernliste) {
+		if (this->y >= mauer.get_y() && this->y <= mauer.get_y() + mauer.get_hoehe()) {
+			if (this->x >= mauer.get_x() && this->x <= mauer.get_x() + mauer.get_laenge()) {
+				return true;
+			}		
+		}
+		
+	}
+	return false;
 }
