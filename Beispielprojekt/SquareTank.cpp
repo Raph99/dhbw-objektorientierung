@@ -103,6 +103,8 @@ class Panzer
 	double y;
 	double angle;
 	int16_t munition = 10;
+
+	bool alive = true;
 	
 	const int16_t nachladezeit = 1*60;
 	int16_t schussfreigabe=0;
@@ -124,11 +126,14 @@ public:
 
 	bool touchiertMauer();
 
+	bool getroffen();
+
 	void schuss();
 
 	double get_x(void) { return this->x; };
 	double get_y(void) { return this->y; };
 	double get_angle(void) { return this->angle; };
+	bool is_alive(void) { return this->alive; };
 	Gosu::Image get_bild(void) { return this->bild; };
 };
 
@@ -139,6 +144,7 @@ class GameWindow : public Gosu::Window
 	vector<Mauer> MauernListe;
 	vector<Panzer> PanzerListe;
 	vector<Geschoss> Geschossliste;
+	
 
 	void MauerErzeugen(double l, Orientierung o, double x, double y) {
 		this->MauernListe.push_back(Mauer(l, o, x, y));
@@ -181,9 +187,24 @@ public:
 			this->zustand = Spielen;
 		}
 		if (this->zustand == Spielen) {
+			vector<Panzer> PanzerListeAktiv;
+			for (Panzer& panzer : this->PanzerListe) {
+				if (panzer.is_alive()) {
+					PanzerListeAktiv.push_back(panzer);
+				}
+			}
+			//this->PanzerListe = PanzerListeAktiv;
 			for (Panzer& panzer : this->PanzerListe) {
 				panzer.act();
 			}
+
+			vector<Geschoss> GeschosslisteAktiv;
+			for (Geschoss& geschoss : this->Geschossliste) {
+				if (geschoss.is_alive()) {
+					GeschosslisteAktiv.push_back(geschoss);
+				}
+			}
+			//this->Geschossliste = GeschosslisteAktiv;
 			for (Geschoss& geschoss : this->Geschossliste) {
 				geschoss.act();
 			}
@@ -200,7 +221,9 @@ public:
 
 		//Panzer zeichnen
 		for (Panzer& panzer : this->PanzerListe) {
-			panzer.get_bild().draw_rot(panzer.get_x(), panzer.get_y(), 1.0, panzer.get_angle());
+			if (panzer.is_alive()) {
+				panzer.get_bild().draw_rot(panzer.get_x(), panzer.get_y(), 1.0, panzer.get_angle());
+			}			
 		}
 
 		//Geschosse zeichnen
@@ -212,13 +235,13 @@ public:
 		}
 
 		//Rahmen zeichnen
-		/*
+		
 		for (Panzer panzer : this->PanzerListe) {
 			vector<Position> Rahmen = panzer.erzeuge_Rahmen();
 			for (Position pos : Rahmen) {
 				Gosu::Graphics::draw_rect(pos.x, pos.y, 2, 2, Gosu::Color::YELLOW, 3.0);
 			}
-		}*/
+		}
 	}
 
 	vector<Mauer> get_MauernListe(void) {
@@ -240,6 +263,16 @@ public:
 		Geschoss neues_Geschoss(x, y, angle, *this);
 		this->Geschossliste.push_back(neues_Geschoss);
 	}
+	bool istPositionVonGeschoss(Position pos) {
+		double toleranz = 2;
+		for (Geschoss geschoss : this->Geschossliste) {
+			Position posG = { geschoss.get_x(), geschoss.get_y() };
+			if (round(pos.x) <= round(posG.x)+toleranz && round(pos.x) >= round(posG.x) - toleranz && round(pos.y) <= round(posG.y) + toleranz && round(pos.y) >= round(posG.y) - toleranz) {
+				return true;
+			}
+		}
+		return false;
+	}
 };
 // C++ Hauptprogramm
 int main()
@@ -253,6 +286,10 @@ void Panzer::act(void) {
 		if (this->schussfreigabe > 0) {
 			this->schussfreigabe--;
 		}
+		if (this->getroffen()) {
+			this->alive = false;
+		}
+
 		if (this->spielernr == 1) {
 			if (this->Fenster.input().down(Gosu::KB_W)) {
 				this->x += sin(Gosu::degrees_to_radians(this->angle))*this->vg;
@@ -374,7 +411,7 @@ vector<Position> Panzer::erzeuge_Rahmen() {
 		Rahmen.push_back({ ObenMitte.x - sin(Gosu::degrees_to_radians(-(90 - this->angle)))*d , ObenMitte.y + cos(Gosu::degrees_to_radians(-(90 - this->angle)))*d });
 	}
 
-	Position UntenMitte = { this->x - sin(Gosu::degrees_to_radians(this->angle))*hoehe / 2.0,  this->y + cos(Gosu::degrees_to_radians(this->angle))*hoehe / 2.0 };
+	Position UntenMitte = { this->x - sin(Gosu::degrees_to_radians(this->angle))*hoehe / 2.0,  this->y + cos(Gosu::degrees_to_radians(this->angle))*hoehe / 2.0};
 	Rahmen.push_back(UntenMitte);
 	for (double d = 0; d < breite / 2; d = d + Auflösung) {
 		Rahmen.push_back({ UntenMitte.x + sin(Gosu::degrees_to_radians(-(90 - this->angle)))*d , UntenMitte.y - cos(Gosu::degrees_to_radians(-(90 - this->angle)))*d });
@@ -385,7 +422,7 @@ vector<Position> Panzer::erzeuge_Rahmen() {
 	Rahmen.push_back(LinksMitte);
 	for (double d = 0; d < hoehe / 2; d = d + Auflösung) {
 		Rahmen.push_back({ LinksMitte.x + sin(Gosu::degrees_to_radians(this->angle))*d,  LinksMitte.y - cos(Gosu::degrees_to_radians(this->angle))*d});
-		Rahmen.push_back({ LinksMitte.x - sin(Gosu::degrees_to_radians(this->angle))*d,  LinksMitte.y + cos(Gosu::degrees_to_radians(this->angle))*d });
+		Rahmen.push_back({ LinksMitte.x - sin(Gosu::degrees_to_radians(this->angle))*d,  LinksMitte.y + cos(Gosu::degrees_to_radians(this->angle))*d});
 	}
 
 	Position RechtsMitte = { this->x - sin(Gosu::degrees_to_radians(-(90 - this->angle)))*breite / 2.0,  this->y + cos(Gosu::degrees_to_radians(-(90 - this->angle)))*breite / 2.0 };
@@ -422,4 +459,16 @@ void Geschoss::act() {
 	else {
 		this->alive = false;
 	}
+}
+
+bool Panzer::getroffen() {
+	vector<Position> Rahmen = this->erzeuge_Rahmen();
+
+
+	for (Position pos : Rahmen) {
+		if (this->Fenster.istPositionVonGeschoss(pos)) {
+			return true;
+		}
+	}
+	return false;
 }
