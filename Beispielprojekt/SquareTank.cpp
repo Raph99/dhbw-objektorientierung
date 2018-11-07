@@ -18,7 +18,7 @@ const double DT = 100.0;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Enum für StateMachine
-enum Zustand { Start, SpielfeldAufbauen, SpielerErstellen, Spielen };
+enum Zustand { Start, SpielfeldAufbauen, Spielen, Spielende };
 
 //Enum für Mauern
 enum Orientierung { horizontal, vertikal };
@@ -35,6 +35,39 @@ class Panzer;
 class GameWindow;
 
 //Klassendefinitionen
+class Mauer
+{
+	const double breite = 10;
+
+	double x;
+	double y;
+	Orientierung orientierung;
+	double laenge;
+	double hoehe;
+
+public:
+	Mauer(double x, double y, Orientierung o, double l) : x(x), y(y), orientierung(o)
+	{
+		if (this->orientierung == horizontal) {
+			this->laenge = l;
+			this->hoehe = this->breite;
+		}
+		else if (this->orientierung == vertikal) {
+			this->laenge = this->breite;
+			this->hoehe = l;
+		}
+	};
+
+	//Getter und Setter
+	double get_x(void) const { return this->x; };
+	double get_y(void) const { return this->y; };
+
+	Orientierung get_orientierung(void) const { return this->orientierung; };
+	double get_hoehe(void) const { return this->hoehe; };
+	double get_laenge(void) const { return this->laenge; };
+};
+
+
 class Geschoss 
 {
 	const double vg = 7;
@@ -52,9 +85,20 @@ class Geschoss
 	bool alive = true;
 
 public:
+	//Konstruktor für erste Erstellung
 	Geschoss(double x, double y, double angle, GameWindow& f) : x(x), y(y), vx(vg*sin(Gosu::degrees_to_radians(angle))), vy(-vg*cos(Gosu::degrees_to_radians(angle))), Fenster(f)
 	{
 		this->timetolive = this->lebenserwartung;
+	};
+
+	//Konstruktor für Kopie
+	Geschoss(double x, double y, double vx, double vy, double ttl, bool a, GameWindow& f) : x(x), y(y), vx(vx), vy(vy), timetolive(ttl), alive(a), Fenster(f)
+	{
+	};
+
+	//Operator =
+	Geschoss& operator=(const Geschoss& g) {
+		Geschoss kopie(g.get_x(), g.get_y(), g.get_vx(), g.get_vy(), g.get_ttl(), g.is_alive(), g.get_Fenster());
 	};
 
 	//Deklaration ausgelagerter Funktionen
@@ -63,44 +107,17 @@ public:
 	//Getter und Setter
 	Gosu::Image get_bild(void) const{ return this->bild; };
 
+	GameWindow& get_Fenster(void) const { return this->Fenster; };
+
 	double get_x(void) const{ return this->x; };
 	double get_y(void) const{ return this->y; };
+	double get_vx(void) const { return this->vx; };
+	double get_vy(void) const { return this->vy; };
 	
+	double get_ttl(void) const { return this->timetolive; };
 	bool is_alive(void) const{ return this->alive; };
 };
 
-
-class Mauer
-{
-	const double breite = 10;
-
-	double x;
-	double y;
-	Orientierung orientierung;
-	double laenge;
-	double hoehe;	
-
-public:
-	Mauer(double x, double y, Orientierung o, double l) : x(x), y(y), orientierung(o)
-	{
-		if (this->orientierung == horizontal) {
-			this->laenge = l;
-			this->hoehe = this->breite;
-		}
-		else if (this->orientierung == vertikal) {
-			this->laenge = this->breite;
-			this->hoehe = l;
-		}
-	};
-
-	//Getter und Setter
-	double get_x(void) const{ return this->x; };
-	double get_y(void) const{ return this->y; };
-
-	Orientierung get_orientierung(void) const{ return this->orientierung; };
-	double get_hoehe(void) const{ return this->hoehe; };
-	double get_laenge(void) const{ return this->laenge; };
-};
 
 class Panzer
 {	
@@ -121,6 +138,8 @@ class Panzer
 	int16_t schussfreigabe = 0;
 	bool alive = true;	
 
+	int16_t punkte = 0;
+
 public:
 	Panzer(double x, double y, double a, int16_t s, GameWindow& f) : x(x), y(y), angle(a), spielernr(s), Fenster(f) 
 	{
@@ -131,22 +150,22 @@ public:
 			bild = Gosu::Image("PanzerRot.png");
 		}
 	};
-	/*Panzer(const Panzer& panzer) : x(panzer.get_x()), y(panzer.get_y()), angle(panzer.get_angle()), spielernr(panzer.get_spielernr()), Fenster(panzer.get_Fenster())
-	{
-		if (this->spielernr == 1) {
-			bild = Gosu::Image("PanzerGruen.png");
-		}
-		else if (this->spielernr == 2) {
-			bild = Gosu::Image("PanzerRot.png");
-		}
-	};*/
+
+	void positionieren(double x, double y, double a) {
+		this->x = x;
+		this->y = y;
+		this->angle = a;
+	};
+
+	void sieg(void) {
+		this->punkte++;
+	};
 
 	//Deklaration ausgelagerter Funktionen
 	vector<Position> erzeuge_Rahmen();
 	bool touchiertMauer();
-	bool getroffen();
 	void schuss();
-	void gameOver();
+	bool getroffen();
 
 	void act();	
 
@@ -166,8 +185,11 @@ class GameWindow : public Gosu::Window
 {
 	Zustand zustand = Start;
 
+	Panzer Spieler1 = Panzer(0.0, 0.0, 0.0, 1, *this);
+	Panzer Spieler2 = Panzer(0.0, 0.0, 0.0, 2, *this);
+
 	vector<Mauer> MauernListe;
-	vector<Panzer> PanzerListe;
+
 	vector<Geschoss> GeschossListe;
 	
 	//Private Methoden
@@ -176,8 +198,7 @@ class GameWindow : public Gosu::Window
 	}
 
 public:
-	GameWindow()
-		: Window(720, 720)
+	GameWindow(): Window(720, 720)
 	{
 		set_caption("SquareTank");
 	}
@@ -204,71 +225,78 @@ public:
 			MauerErzeugen(0.0, 426.0, horizontal, 578.0);
 			MauerErzeugen(142.0, 568.0, horizontal, 578.0);
 
-			this->zustand = SpielerErstellen;
-		}
-
-		if (this->zustand == SpielerErstellen) {
-			this->PanzerListe.push_back(Panzer(76.0, 76.0, 90.0, 1, *this));
-			this->PanzerListe.push_back(Panzer(644.0, 644.0, 270.0, 2, *this));
-
+			//Panzer positionieren
+			Spieler1.positionieren(76.0, 76.0, 90.0);
+			Spieler2.positionieren(644.0, 644.0, 270.0);
 			this->zustand = Spielen;
 		}
-		if (this->zustand == Spielen) {
-			/*vector<Panzer> PanzerListeAktiv;
-			for (Panzer& panzer : this->PanzerListe) {
-				if (panzer.is_alive()) {
-					PanzerListeAktiv.push_back(panzer);
-				}
-			}
-			this->PanzerListe = PanzerListeAktiv; */
-			for (Panzer& panzer : this->PanzerListe) {
-				panzer.act();
-			}
 
-			/*vector<Geschoss> GeschossListeAktiv;
-			for (Geschoss& geschoss : this->GeschossListe) {
+		if (this->zustand == Spielen) {
+
+			Spieler1.act();
+			Spieler2.act();
+			
+			vector<Geschoss> GeschossListeAlt = this->GeschossListe;
+			int anzahlGeschosse = this->GeschossListe.size();
+			for (int i = 0; i < anzahlGeschosse; i++) {
+				this->GeschossListe.pop_back();
+			}
+			for (Geschoss geschoss : GeschossListeAlt) {
 				if (geschoss.is_alive()) {
-					GeschossListeAktiv.push_back(geschoss);
+					this->GeschossListe.push_back(geschoss);
 				}
 			}
-			this->Geschossliste = GeschosslisteAktiv;*/
 			for (Geschoss& geschoss : this->GeschossListe) {
 				geschoss.act();
+			}
+		}
+		if (this->zustand == Spielende) {
+			//Alle Geschosse löschen
+			int anzahlGeschosse = this->GeschossListe.size();
+			for (int i = 0; i < anzahlGeschosse; i++) {
+				this->GeschossListe.pop_back();
+			}
+
+			//Alle Mauern löschen
+			int anzahlMauern = this->MauernListe.size();
+			for (int i = 0; i < anzahlMauern; i++) {
+				this->MauernListe.pop_back();
 			}
 		}
 	}
 
 	void draw() override
 	{
-		//Hintergrund zeichnen
-		Gosu::Graphics::draw_rect(0.0, 0.0, this->width(), this->height(), Gosu::Color::WHITE, 0.0);
+		if (this->zustand == Spielen) {
+			//Hintergrund zeichnen
+			Gosu::Graphics::draw_rect(0.0, 0.0, this->width(), this->height(), Gosu::Color::WHITE, 0.0);
 
-		//Mauern zeichnen
-		for (Mauer& mauer : this->MauernListe) {
-			Gosu::Graphics::draw_rect(mauer.get_x(), mauer.get_y(), mauer.get_laenge(), mauer.get_hoehe(), Gosu::Color::BLACK, 2.0);
-		}
-
-		//Panzer zeichnen
-		for (Panzer& panzer : this->PanzerListe) {
-			if (panzer.is_alive()) {
-				panzer.get_bild().draw_rot(panzer.get_x(), panzer.get_y(), 1.0, panzer.get_angle());
-			}			
-		}
-
-		//Geschosse zeichnen
-		for (Geschoss& geschoss : this->GeschossListe) {
-			if (geschoss.is_alive()) {
-				geschoss.get_bild().draw_rot(geschoss.get_x(), geschoss.get_y(), 1.0, 0.0);
-			}			
-		}
-
-		//Rahmen von Panzern zeichnen zeichnen (für Entwicklungszwecke)
-		/*for (Panzer panzer : this->PanzerListe) {
-			vector<Position> Rahmen = panzer.erzeuge_Rahmen();
-			for (Position pos : Rahmen) {
-				Gosu::Graphics::draw_rect(pos.x, pos.y, 2, 2, Gosu::Color::YELLOW, 3.0);
+			//Mauern zeichnen
+			for (Mauer& mauer : this->MauernListe) {
+				Gosu::Graphics::draw_rect(mauer.get_x(), mauer.get_y(), mauer.get_laenge(), mauer.get_hoehe(), Gosu::Color::BLACK, 2.0);
 			}
-		}*/
+
+			//Panzer zeichnen
+			Spieler1.get_bild().draw_rot(Spieler1.get_x(), Spieler1.get_y(), 1.0, Spieler1.get_angle());
+			Spieler2.get_bild().draw_rot(Spieler2.get_x(), Spieler2.get_y(), 1.0, Spieler2.get_angle());
+
+			//Geschosse zeichnen
+			for (Geschoss& geschoss : this->GeschossListe) {
+				geschoss.get_bild().draw_rot(geschoss.get_x(), geschoss.get_y(), 1.0, 0.0);		
+			}
+
+			//Rahmen von Panzern zeichnen zeichnen (für Entwicklungszwecke)
+			/*for (Panzer panzer : this->PanzerListe) {
+				vector<Position> Rahmen = panzer.erzeuge_Rahmen();
+				for (Position pos : Rahmen) {
+					Gosu::Graphics::draw_rect(pos.x, pos.y, 2, 2, Gosu::Color::YELLOW, 3.0);
+				}
+			}*/
+		}
+		if (this->zustand == Spielende) {
+			//Hintergrund zeichnen
+			Gosu::Graphics::draw_rect(0.0, 0.0, this->width(), this->height(), Gosu::Color::RED, 0.0);
+		}
 	}
 
 
@@ -300,6 +328,38 @@ public:
 		}
 		return false;
 	}	
+
+	bool beruehrtAnderenPanzer(Panzer& frager) {
+		double toleranz = 1;
+		vector<Position> fragerRahmen = frager.erzeuge_Rahmen();
+		vector<Position> andererRahmen;
+		if (frager.get_spielernr() == 1) {
+			andererRahmen = this->Spieler2.erzeuge_Rahmen();
+		}
+		else if (frager.get_spielernr() == 2) {
+			andererRahmen = this->Spieler1.erzeuge_Rahmen();
+		}
+		for (Position posF : fragerRahmen) {
+			double xf = posF.x;
+			double yf = posF.y;
+			for (Position posA : andererRahmen) {
+				if (posA.x <= xf + toleranz && posA.x >= xf - toleranz && posA.y <= yf + toleranz && posA.y >= yf - toleranz) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	void spielende(Panzer& verlierer) {
+		if (verlierer.get_spielernr() == 1) {
+			Spieler2.sieg();
+		}
+		else if (verlierer.get_spielernr() == 2) {
+			Spieler1.sieg();
+		}
+		this->zustand = Spielende;
+	}
 };
 
 
@@ -319,7 +379,8 @@ void Panzer::act(void) {
 			this->schussfreigabe--;
 		}
 		if (this->getroffen()) {
-			this->gameOver();
+			this->alive = false;
+			this->Fenster.spielende(*this);
 		}
 
 		//Spielerspezifischer Teil
@@ -328,7 +389,7 @@ void Panzer::act(void) {
 			if (this->Fenster.input().down(Gosu::KB_W)) {
 				this->x += sin(Gosu::degrees_to_radians(this->angle))*this->vg;
 				this->y += -cos(Gosu::degrees_to_radians(this->angle))*this->vg;
-				if (this->touchiertMauer()) {
+				if (this->touchiertMauer()||this->Fenster.beruehrtAnderenPanzer(*this)) {
 					this->x -= sin(Gosu::degrees_to_radians(this->angle))*this->vg;
 					this->y -= -cos(Gosu::degrees_to_radians(this->angle))*this->vg;
 				}
@@ -336,7 +397,7 @@ void Panzer::act(void) {
 			if (this->Fenster.input().down(Gosu::KB_S)) {
 				this->x -= sin(Gosu::degrees_to_radians(this->angle))*this->vg;
 				this->y -= -cos(Gosu::degrees_to_radians(this->angle))*this->vg;
-				if (this->touchiertMauer()) {
+				if (this->touchiertMauer() || this->Fenster.beruehrtAnderenPanzer(*this)) {
 					this->x += sin(Gosu::degrees_to_radians(this->angle))*this->vg;
 					this->y += -cos(Gosu::degrees_to_radians(this->angle))*this->vg;
 				}
@@ -347,7 +408,7 @@ void Panzer::act(void) {
 				if (this->angle < 0.0) {
 					this->angle = 360.0 + this->angle;
 				}
-				if (this->touchiertMauer()) {
+				if (this->touchiertMauer() || this->Fenster.beruehrtAnderenPanzer(*this)) {
 					this->angle = angle_old;
 				}
 			}
@@ -357,7 +418,7 @@ void Panzer::act(void) {
 				if (this->angle > 360.0) {
 					this->angle = this->angle - 360.0;
 				}
-				if (this->touchiertMauer()) {
+				if (this->touchiertMauer() || this->Fenster.beruehrtAnderenPanzer(*this)) {
 					this->angle = angle_old;
 				}
 			}
@@ -371,7 +432,7 @@ void Panzer::act(void) {
 			if (this->Fenster.input().down(Gosu::KB_UP)) {
 				this->x += sin(Gosu::degrees_to_radians(this->angle))*this->vg;
 				this->y += -cos(Gosu::degrees_to_radians(this->angle))*this->vg;
-				if (this->touchiertMauer()) {
+				if (this->touchiertMauer() || this->Fenster.beruehrtAnderenPanzer(*this)) {
 					this->x -= sin(Gosu::degrees_to_radians(this->angle))*this->vg;
 					this->y -= -cos(Gosu::degrees_to_radians(this->angle))*this->vg;
 				}
@@ -379,7 +440,7 @@ void Panzer::act(void) {
 			if (this->Fenster.input().down(Gosu::KB_DOWN)) {
 				this->x -= sin(Gosu::degrees_to_radians(this->angle))*this->vg;
 				this->y -= -cos(Gosu::degrees_to_radians(this->angle))*this->vg;
-				if (this->touchiertMauer()) {
+				if (this->touchiertMauer() || this->Fenster.beruehrtAnderenPanzer(*this)) {
 					this->x += sin(Gosu::degrees_to_radians(this->angle))*this->vg;
 					this->y += -cos(Gosu::degrees_to_radians(this->angle))*this->vg;
 				}
@@ -390,7 +451,7 @@ void Panzer::act(void) {
 				if (this->angle < 0.0) {
 					this->angle = 360.0 + this->angle;
 				}
-				if (this->touchiertMauer()) {
+				if (this->touchiertMauer() || this->Fenster.beruehrtAnderenPanzer(*this)) {
 					this->angle = angle_old;
 				}
 			}
@@ -400,7 +461,7 @@ void Panzer::act(void) {
 				if (this->angle > 360.0) {
 					this->angle = this->angle - 360.0;
 				}
-				if (this->touchiertMauer()) {
+				if (this->touchiertMauer() || this->Fenster.beruehrtAnderenPanzer(*this)) {
 					this->angle = angle_old;
 				}
 			}
@@ -410,7 +471,6 @@ void Panzer::act(void) {
 		}
 	}
 }
-
 
 vector<Position> Panzer::erzeuge_Rahmen() {
 	double Aufloesung = 4;
@@ -449,6 +509,7 @@ vector<Position> Panzer::erzeuge_Rahmen() {
 
 	return Rahmen;
 }
+
 bool Panzer::touchiertMauer(void) {
 	vector<Position> Rahmen = this->erzeuge_Rahmen();
 	
@@ -461,11 +522,12 @@ bool Panzer::touchiertMauer(void) {
 }
 
 void Panzer::schuss() {
-	if (this->schussfreigabe == 0) {
+	if (this->schussfreigabe == 0 && this->munition>0) {
 		double hoehe = this->bild.height();
 		double breite = this->bild.width();
 		this->Fenster.erzeuge_Geschoss(this->x + sin(Gosu::degrees_to_radians(this->angle))*hoehe / 2.0, this->y - cos(Gosu::degrees_to_radians(-this->angle))*hoehe / 2.0, this->angle);
 		this->schussfreigabe = this->nachladezeit;
+		this->munition--;
 	}
 }
 
@@ -480,10 +542,6 @@ bool Panzer::getroffen() {
 	return false;
 }
 
-void Panzer::gameOver() {
-	this->alive = false;
-}
-
 //Funktionsdefinitionen für Geschoss
 void Geschoss::act() {
 	double radius = this->bild.height() / 2;
@@ -494,10 +552,10 @@ void Geschoss::act() {
 	Position Links = { this->x - radius, this->y };
 	Position Rechts = { this->x + radius, this->y };	
 
-	if (this->Fenster.istPositionInMauer(Oben) || this->Fenster.istPositionInMauer(Unten)) {
+	if (this->Fenster.istPositionInMauer(Oben) != this->Fenster.istPositionInMauer(Unten)) {
 		this->vy = this->vy *(-1.0);
 	}
-	if (this->Fenster.istPositionInMauer(Links) || this->Fenster.istPositionInMauer(Rechts)) {
+	if (this->Fenster.istPositionInMauer(Links) != this->Fenster.istPositionInMauer(Rechts)) {
 		this->vx = this->vx *(-1.0);
 	}
 
