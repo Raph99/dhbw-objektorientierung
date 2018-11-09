@@ -216,6 +216,7 @@ public:
 	// dann werden `draw` Aufrufe ausgelassen und die Framerate sinkt
 	void update() override
 	{
+		int level = 1;
 		if (this->zustand == Start) {
 			if (this->input().down(Gosu::KB_S)) {
 				this->zustand = StartEnde;
@@ -228,23 +229,129 @@ public:
 		}
 
 		if (this->zustand == SpielfeldAufbauen) {
-			//Rahmen
-			MauerErzeugen(0.0, 0.0, horizontal, 720.0);
-			MauerErzeugen(0.0, 710.0, horizontal, 720.0);
-			MauerErzeugen(0.0, 0.0, vertikal, 720.0);
-			MauerErzeugen(710.0, 0.0, vertikal, 720.0);
+			if (level == 1)
+			{//Rahmen
+				MauerErzeugen(0.0, 0.0, horizontal, 720.0);
+				MauerErzeugen(0.0, 710.0, horizontal, 720.0);
+				MauerErzeugen(0.0, 0.0, vertikal, 720.0);
+				MauerErzeugen(710.0, 0.0, vertikal, 720.0);
 
-			//Rest
-			MauerErzeugen(0.0, 142.0, horizontal, 578.0);
-			MauerErzeugen(142.0, 284.0, horizontal, 578.0);
-			MauerErzeugen(0.0, 426.0, horizontal, 578.0);
-			MauerErzeugen(142.0, 568.0, horizontal, 578.0);
+				//Rest
+				MauerErzeugen(0.0, 142.0, horizontal, 578.0);
+				MauerErzeugen(142.0, 284.0, horizontal, 578.0);
+				MauerErzeugen(0.0, 426.0, horizontal, 578.0);
+				MauerErzeugen(142.0, 568.0, horizontal, 578.0);
 
-			//Panzer positionieren
-			Spieler1.positionieren(76.0, 76.0, 90.0);
-			Spieler2.positionieren(644.0, 644.0, 270.0);
-			this->zustand = Spielen;
+				//Panzer positionieren
+				Spieler1.positionieren(76.0, 76.0, 90.0);
+				Spieler2.positionieren(644.0, 644.0, 270.0);
+				this->zustand = Spielen;
+			}
+			if (level == 2)
+			{
+				//Rahmen
+				MauerErzeugen(0.0, 0.0, horizontal, 720.0);
+				MauerErzeugen(0.0, 710.0, horizontal, 720.0);
+				MauerErzeugen(0.0, 0.0, vertikal, 720.0);
+				MauerErzeugen(710.0, 0.0, vertikal, 720.0);
+
+				//Rest
+				MauerErzeugen(0.0, 142.0, horizontal, 294.0);
+				MauerErzeugen(426.0, 142.0, horizontal, 294.0);
+				MauerErzeugen(132.0, 284.0, horizontal, 456.0);
+				MauerErzeugen(0.0, 426.0, horizontal, 294.0);
+				MauerErzeugen(426.0, 426.0, horizontal, 294.0);
+				MauerErzeugen(132.0, 568.0, horizontal, 456.0);
+
+				//Panzer positionieren
+				Spieler1.positionieren(76.0, 76.0, 90.0);
+				Spieler2.positionieren(644.0, 644.0, 270.0);
+				this->zustand = Spielen;
+			}
+			if (level == 3)
+			{
+				//Rahmen
+				MauerErzeugen(0.0, 0.0, horizontal, 720.0);
+				MauerErzeugen(0.0, 710.0, horizontal, 720.0);
+				MauerErzeugen(0.0, 0.0, vertikal, 720.0);
+				MauerErzeugen(710.0, 0.0, vertikal, 720.0);
+
+				//Rest
+				MauerErzeugen(147.0, 0.0, vertikal, 71.0);
+				MauerErzeugen(284.0, 71.0, vertikal, 71.0);
+
+				MauerErzeugen(563.0, 0.0, vertikal, 71.0);
+				MauerErzeugen(426.0, 71.0, vertikal, 71.0);
+
+				MauerErzeugen(132.0, 497.0, vertikal, 71.0);
+				MauerErzeugen(578.0, 497.0, vertikal, 71.0);
+
+				MauerErzeugen(284.0, 426.0, vertikal, 71.0);
+				MauerErzeugen(426.0, 426.0, vertikal, 71.0);
+
+				MauerErzeugen(0.0, 142.0, horizontal, 294.0);
+				MauerErzeugen(426.0, 142.0, horizontal, 294.0);
+				MauerErzeugen(132.0, 284.0, horizontal, 456.0);
+				MauerErzeugen(0.0, 426.0, horizontal, 294.0);
+				MauerErzeugen(426.0, 426.0, horizontal, 294.0);
+				MauerErzeugen(132.0, 568.0, horizontal, 456.0);
+
+				
+
+				//Panzer positionieren
+				Spieler1.positionieren(76.0, 76.0, 90.0);
+				Spieler2.positionieren(644.0, 644.0, 270.0);
+				this->zustand = Spielen;
+			}
+			if (level == 4)
+			{
+				//Rahmen
+				MauerErzeugen(0.0, 0.0, horizontal, 720.0);
+				MauerErzeugen(0.0, 710.0, horizontal, 720.0);
+				MauerErzeugen(0.0, 0.0, vertikal, 720.0);
+				MauerErzeugen(710.0, 0.0, vertikal, 720.0);
+
+				//Rest
+				MauerErzeugen(147.0, 0.0, vertikal, 71.0);
+				MauerErzeugen(284.0, 71.0, vertikal, 71.0);
+
+				MauerErzeugen(563.0, 0.0, vertikal, 71.0);
+				MauerErzeugen(426.0, 71.0, vertikal, 71.0);
+
+				MauerErzeugen(132.0, 497.0, vertikal, 71.0);
+				MauerErzeugen(578.0, 497.0, vertikal, 71.0);
+
+				MauerErzeugen(284.0, 426.0, vertikal, 71.0);
+				MauerErzeugen(426.0, 426.0, vertikal, 71.0);
+
+				//TAKTIK MAUERN: Panzer kommt nicht durch, Kugeln schon. Sollen auf der 2. und 3. horiz. Ebene liegen
+				
+				MauerErzeugen(578.0, 167.0, vertikal, 102.0);
+				MauerErzeugen(132.0, 309.0, vertikal, 102.0);
+
+
+				//Mauern für Durchschlupf
+				MauerErzeugen(132.0, 142.0, vertikal, 102.0);
+				MauerErzeugen(578.0, 334.0, vertikal, 102.0);
+
+
+				MauerErzeugen(0.0, 142.0, horizontal, 294.0);
+				MauerErzeugen(426.0, 142.0, horizontal, 294.0);
+				MauerErzeugen(132.0, 284.0, horizontal, 456.0);
+				MauerErzeugen(0.0, 426.0, horizontal, 294.0);
+				MauerErzeugen(426.0, 426.0, horizontal, 294.0);
+				MauerErzeugen(132.0, 568.0, horizontal, 456.0);
+
+
+
+				//Panzer positionieren
+				Spieler1.positionieren(76.0, 76.0, 90.0);
+				Spieler2.positionieren(644.0, 644.0, 270.0);
+				this->zustand = Spielen;
+			}
+
 		}
+
 
 		if (this->zustand == Spielen) {
 
