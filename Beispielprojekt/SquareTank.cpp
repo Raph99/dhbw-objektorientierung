@@ -7,6 +7,7 @@
 #include <string>
 #include <math.h>
 #include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -18,7 +19,7 @@ const double DT = 100.0;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Enum für StateMachine
-enum Zustand { Start, SpielfeldAufbauen, Spielen, Spielende };
+enum Zustand { Start, StartEnde, SpielfeldAufbauen, Spielen, Spielende, SpielendeEnde };
 
 //Enum für Mauern
 enum Orientierung { horizontal, vertikal };
@@ -177,12 +178,19 @@ public:
 	double get_x(void) const { return this->x; };
 	double get_y(void) const { return this->y; };
 	double get_angle(void) const { return this->angle; };
+	int16_t get_punkte(void) const { return this->punkte; };
 	bool is_alive(void) const { return this->alive; };
 };
 
 
 class GameWindow : public Gosu::Window
 {
+	Gosu::Image Startbildschirm = Gosu::Image("Startbildschirm.png");
+	Gosu::Image Zwischenbildschirm = Gosu::Image("Zwischenbildschirm.png");
+
+	Gosu::Font PunkteStandSpieler1 = Gosu::Font(70);
+	Gosu::Font PunkteStandSpieler2 = Gosu::Font(70);
+
 	Zustand zustand = Start;
 
 	Panzer Spieler1 = Panzer(0.0, 0.0, 0.0, 1, *this);
@@ -209,7 +217,14 @@ public:
 	void update() override
 	{
 		if (this->zustand == Start) {
-			this->zustand = SpielfeldAufbauen;
+			if (this->input().down(Gosu::KB_S)) {
+				this->zustand = StartEnde;
+			}			
+		}
+		if (this->zustand == StartEnde) {
+			if (!this->input().down(Gosu::KB_S)) {
+				this->zustand = SpielfeldAufbauen;
+			}
 		}
 
 		if (this->zustand == SpielfeldAufbauen) {
@@ -262,11 +277,23 @@ public:
 			for (int i = 0; i < anzahlMauern; i++) {
 				this->MauernListe.pop_back();
 			}
+			if (this->input().down(Gosu::KB_N)) {
+				this->zustand = SpielendeEnde;
+			}
+		}
+		if (this->zustand == SpielendeEnde) {
+			if (!this->input().down(Gosu::KB_N)) {
+				this->zustand = SpielfeldAufbauen;
+			}
 		}
 	}
 
 	void draw() override
 	{
+		if (this->zustand == Start||this->zustand==StartEnde) {
+			this->Startbildschirm.draw_rot(360, 360, 0.0, 0.0);
+		}
+
 		if (this->zustand == Spielen) {
 			//Hintergrund zeichnen
 			Gosu::Graphics::draw_rect(0.0, 0.0, this->width(), this->height(), Gosu::Color::WHITE, 0.0);
@@ -293,9 +320,10 @@ public:
 				}
 			}*/
 		}
-		if (this->zustand == Spielende) {
-			//Hintergrund zeichnen
-			Gosu::Graphics::draw_rect(0.0, 0.0, this->width(), this->height(), Gosu::Color::RED, 0.0);
+		if (this->zustand == Spielende|| this->zustand == SpielendeEnde) {
+			this->Zwischenbildschirm.draw_rot(360, 360, 0.0, 0.0);
+			this->PunkteStandSpieler1.draw(to_string(this->Spieler1.get_punkte()), 290.0, 305.0, 2.0, 1.0, 1.0, Gosu::Color::BLACK);
+			this->PunkteStandSpieler1.draw(to_string(this->Spieler2.get_punkte()), 400.0, 305.0, 2.0, 1.0, 1.0, Gosu::Color::BLACK);
 		}
 	}
 
@@ -358,6 +386,19 @@ public:
 		else if (verlierer.get_spielernr() == 2) {
 			Spieler1.sieg();
 		}
+
+		//Geschosse löschen
+		int anzahlGeschosse = this->GeschossListe.size();
+		for (int i = 0; i < anzahlGeschosse; i++) {
+			this->GeschossListe.pop_back();
+		}
+
+		//Mauern löschen
+		int anzahlMauern = this->MauernListe.size();
+		for (int i = 0; i < anzahlMauern; i++) {
+			this->MauernListe.pop_back();
+		}
+
 		this->zustand = Spielende;
 	}
 };
