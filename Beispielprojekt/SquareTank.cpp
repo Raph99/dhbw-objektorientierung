@@ -428,14 +428,14 @@ public:
 			for (Geschoss& geschoss : this->GeschossListe) {
 				geschoss.get_bild().draw_rot(geschoss.get_x(), geschoss.get_y(), 1.0, 0.0);		
 			}
-
-			//Rahmen von Panzern zeichnen zeichnen (für Entwicklungszwecke)
-			/*for (Panzer panzer : this->PanzerListe) {
-				vector<Position> Rahmen = panzer.erzeuge_Rahmen();
-				for (Position pos : Rahmen) {
-					Gosu::Graphics::draw_rect(pos.x, pos.y, 2, 2, Gosu::Color::YELLOW, 3.0);
-				}
-			}*/
+			
+			/*
+			//Rahmen von Panzer 1 zeichnen
+			vector<Position> Rahmen = this->Spieler1.erzeuge_Rahmen();
+			for (Position pos : Rahmen) {
+				Gosu::Graphics::draw_rect(pos.x, pos.y, 2, 2, Gosu::Color::YELLOW, 3.0);
+			}
+			*/
 		}
 		if (this->zustand == Spielende|| this->zustand == SpielendeEnde) {
 			this->Zwischenbildschirm.draw_rot(360, 360, 0.0, 0.0);
@@ -475,7 +475,7 @@ public:
 	}	
 
 	bool beruehrtAnderenPanzer(Panzer& frager) {
-		double toleranz = 1;
+		double toleranz = 2;
 		vector<Position> fragerRahmen = frager.erzeuge_Rahmen();
 		vector<Position> andererRahmen;
 		if (frager.get_spielernr() == 1) {
