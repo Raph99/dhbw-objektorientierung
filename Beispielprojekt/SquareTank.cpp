@@ -623,7 +623,7 @@ void Panzer::act(void) {
 					this->angle = angle_old;
 				}
 			}
-			if (this->Fenster.input().down(Gosu::KB_RETURN)) {
+			if (this->Fenster.input().down(Gosu::KB_ENTER)) {
 				this->schuss();
 			}
 		}
