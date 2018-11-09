@@ -205,6 +205,8 @@ class GameWindow : public Gosu::Window
 		this->MauernListe.push_back(Mauer(x, y, o, l));
 	}
 
+	int16_t level = 1;
+
 public:
 	GameWindow(): Window(720, 720)
 	{
@@ -229,7 +231,7 @@ public:
 		}
 
 		if (this->zustand == SpielfeldAufbauen) {
-			if (level == 1)
+			if (this->level == 1)
 			{//Rahmen
 				MauerErzeugen(0.0, 0.0, horizontal, 720.0);
 				MauerErzeugen(0.0, 710.0, horizontal, 720.0);
@@ -247,7 +249,7 @@ public:
 				Spieler2.positionieren(644.0, 644.0, 270.0);
 				this->zustand = Spielen;
 			}
-			if (level == 2)
+			if (this->level == 2)
 			{
 				//Rahmen
 				MauerErzeugen(0.0, 0.0, horizontal, 720.0);
@@ -268,7 +270,7 @@ public:
 				Spieler2.positionieren(644.0, 644.0, 270.0);
 				this->zustand = Spielen;
 			}
-			if (level == 3)
+			if (this->level == 3)
 			{
 				//Rahmen
 				MauerErzeugen(0.0, 0.0, horizontal, 720.0);
@@ -303,7 +305,7 @@ public:
 				Spieler2.positionieren(644.0, 644.0, 270.0);
 				this->zustand = Spielen;
 			}
-			if (level == 4)
+			if (this->level == 4)
 			{
 				//Rahmen
 				MauerErzeugen(0.0, 0.0, horizontal, 720.0);
@@ -390,6 +392,10 @@ public:
 		}
 		if (this->zustand == SpielendeEnde) {
 			if (!this->input().down(Gosu::KB_N)) {
+				this->level++;
+				if (this->level == 5) {
+					this->level = 1;
+				}
 				this->zustand = SpielfeldAufbauen;
 			}
 		}
