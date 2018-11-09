@@ -126,6 +126,7 @@ class Panzer
 	const double vrot = 2;
 	const int16_t munitionskapazitaet = 10;
 	const int16_t nachladezeit = 1 * 60;
+	Gosu::Sample schussSound = Gosu::Sample::Sample("schuss.wav");
 
 	Gosu::Image bild;
 	int16_t spielernr;
@@ -178,7 +179,10 @@ public:
 	double get_x(void) const { return this->x; };
 	double get_y(void) const { return this->y; };
 	double get_angle(void) const { return this->angle; };
-	int16_t get_punkte(void) const { return this->punkte; };
+	int16_t get_punkte(void) {  
+		this->munition = this->munitionskapazitaet;
+		return this->punkte;
+	};
 	bool is_alive(void) const { return this->alive; };
 };
 
@@ -677,6 +681,7 @@ bool Panzer::touchiertMauer(void) {
 
 void Panzer::schuss() {
 	if (this->schussfreigabe == 0 && this->munition>0) {
+		this->schussSound.play();
 		double hoehe = this->bild.height();
 		double breite = this->bild.width();
 		this->Fenster.erzeuge_Geschoss(this->x + sin(Gosu::degrees_to_radians(this->angle))*hoehe / 2.0, this->y - cos(Gosu::degrees_to_radians(-this->angle))*hoehe / 2.0, this->angle);
