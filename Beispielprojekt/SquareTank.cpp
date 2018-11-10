@@ -463,7 +463,7 @@ public:
 	}
 
 	bool istPositionInGeschoss(Position pos) {
-		double toleranz = 2;
+		double toleranz = 3;
 		for (Geschoss geschoss : this->GeschossListe) {
 			double x_g = geschoss.get_x();
 			double y_g = geschoss.get_y();
